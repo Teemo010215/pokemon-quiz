@@ -3,42 +3,75 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>宝可梦种族值猜谜</title>
+  <title>宝可梦种族值挑战</title>
   <style>
     * { box-sizing: border-box; }
     body {
       margin: 0;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-      background: #f6f7fb;
-      color: #222;
+      background: radial-gradient(circle at top, #eef2ff 0, #f8fafc 40%, #f6f7fb 100%);
+      color: #1f2937;
+      min-height: 100vh;
     }
-    .container {
-      max-width: 980px;
-      margin: 36px auto;
-      padding: 20px;
-    }
+    button, select { font: inherit; }
+    .container { max-width: 1060px; margin: 0 auto; padding: 28px 18px 50px; }
     .card {
-      background: white;
-      border-radius: 20px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-      padding: 24px;
+      background: rgba(255,255,255,.96);
+      border: 1px solid #e5e7eb;
+      border-radius: 24px;
+      box-shadow: 0 18px 50px rgba(15,23,42,.08);
+      padding: 26px;
     }
-    h1 { margin: 0 0 10px; font-size: 30px; }
-    .sub { color: #666; margin-bottom: 20px; }
-    .topbar { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 18px; }
-    .pill {
-      background: #eef2ff;
-      color: #334155;
-      padding: 8px 14px;
+    .hero {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+    }
+    h1 { margin: 0; font-size: clamp(28px,4vw,40px); letter-spacing: -0.03em; }
+    .sub { color: #64748b; margin-top: 8px; line-height: 1.6; }
+    .mode-badge {
+      padding: 9px 14px;
       border-radius: 999px;
+      font-weight: 800;
+      background: #111827;
+      color: white;
+      white-space: nowrap;
+    }
+    .topbar {
+      display: grid;
+      grid-template-columns: repeat(4,minmax(0,1fr));
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .pill {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 11px 13px;
       font-size: 14px;
-      font-weight: 700;
+      font-weight: 800;
+    }
+    .progress-wrap {
+      margin: 10px 0 22px;
+      background: #e5e7eb;
+      border-radius: 999px;
+      height: 12px;
+      overflow: hidden;
+    }
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg,#60a5fa,#8b5cf6,#ec4899);
+      transition: width .3s ease;
     }
     .settings {
       display: flex;
-      gap: 14px;
+      gap: 12px;
       flex-wrap: wrap;
-      margin-bottom: 20px;
+      margin-bottom: 18px;
       align-items: center;
     }
     .setting-block {
@@ -48,170 +81,225 @@
       background: #f8fafc;
       border: 1px solid #e5e7eb;
       border-radius: 14px;
-      padding: 10px 14px;
+      padding: 10px 13px;
     }
     select {
       border: 1px solid #cbd5e1;
       border-radius: 10px;
-      padding: 8px 12px;
-      font-size: 14px;
+      padding: 8px 10px;
       background: white;
     }
     .stats-box {
-      border: 1px solid #e8ebf2;
-      border-radius: 18px;
-      padding: 18px;
-      margin-bottom: 22px;
+      border: 1px solid #e5e7eb;
+      border-radius: 20px;
+      padding: 20px;
       background: #fcfcff;
     }
-    .stats-title { font-size: 18px; font-weight: 800; margin-bottom: 14px; }
+    .stats-title {
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:center;
+      font-weight: 900;
+      font-size: 18px;
+      margin-bottom: 16px;
+    }
+    .difficulty-label {
+      color:#7c3aed;
+      font-size:14px;
+      background:#f3e8ff;
+      padding:7px 10px;
+      border-radius:999px;
+    }
     .stat-row {
       display: grid;
-      grid-template-columns: 60px 1fr 50px;
+      grid-template-columns: 64px 1fr 52px;
       align-items: center;
       gap: 10px;
       margin: 10px 0;
     }
-    .stat-label { font-size: 14px; font-weight: 700; color: #444; }
-    .bar-wrap {
-      width: 100%;
-      height: 14px;
-      background: #e9edf5;
-      border-radius: 999px;
-      overflow: hidden;
-    }
-    .bar {
-      height: 100%;
-      border-radius: 999px;
-      background: linear-gradient(90deg, #60a5fa, #a78bfa);
-    }
-    .stat-value { text-align: right; font-size: 14px; font-weight: 700; color: #333; }
+    .stat-label { font-size: 14px; font-weight: 800; }
+    .bar-wrap { height: 14px; background:#e9edf5; border-radius:999px; overflow:hidden; }
+    .bar { height:100%; border-radius:999px; background:linear-gradient(90deg,#3b82f6,#8b5cf6); }
+    .stat-value { text-align:right; font-size:14px; font-weight:800; }
     .total-box {
-      margin-top: 14px;
-      padding: 12px 14px;
-      background: #f1f5f9;
-      border-radius: 12px;
-      font-weight: 800;
+      margin-top:14px;
+      background:#f1f5f9;
+      border-radius:12px;
+      padding:12px 14px;
+      font-weight:900;
     }
     .options {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
-      margin-top: 20px;
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:14px;
+      margin-top:18px;
     }
     .option-btn {
-      border: 1px solid #e5e7eb;
-      border-radius: 16px;
-      padding: 14px;
-      background: #f8fafc;
-      cursor: pointer;
-      text-align: left;
-      transition: 0.15s ease;
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      min-height: 100px;
+      border:1px solid #e5e7eb;
+      border-radius:18px;
+      background:white;
+      padding:14px;
+      display:flex;
+      align-items:center;
+      gap:14px;
+      text-align:left;
+      cursor:pointer;
+      transition:.16s ease;
+      min-height:112px;
     }
     .option-btn:hover:not(:disabled) {
-      transform: translateY(-1px);
-      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
-      background: #eef4ff;
+      transform:translateY(-2px);
+      box-shadow:0 10px 24px rgba(15,23,42,.08);
+      border-color:#c7d2fe;
+      background:#f8faff;
     }
-    .option-btn:disabled { cursor: default; opacity: 0.96; }
+    .option-btn:disabled { cursor:default; }
     .option-image {
-      width: 72px;
-      height: 72px;
-      object-fit: contain;
-      background: white;
-      border-radius: 12px;
-      padding: 6px;
-      border: 1px solid #e5e7eb;
-      flex-shrink: 0;
+      width:82px;
+      height:82px;
+      object-fit:contain;
+      background:#f8fafc;
+      border-radius:14px;
+      border:1px solid #e5e7eb;
+      padding:6px;
+      flex-shrink:0;
     }
-    .option-text { display: flex; flex-direction: column; gap: 6px; }
-    .option-name { font-size: 18px; font-weight: 800; color: #1f2937; }
-    .option-meta { font-size: 13px; color: #64748b; font-weight: 600; }
-    .correct { background: #dcfce7 !important; border-color: #86efac !important; }
-    .wrong { background: #fee2e2 !important; border-color: #fca5a5 !important; }
-    .feedback { margin-top: 18px; min-height: 28px; font-size: 16px; font-weight: 800; }
+    .option-name { font-size:18px; font-weight:900; }
+    .option-meta { color:#64748b; font-size:13px; font-weight:700; margin-top:5px; }
+    .correct { background:#dcfce7 !important; border-color:#86efac !important; }
+    .wrong { background:#fee2e2 !important; border-color:#fca5a5 !important; }
+    .feedback { min-height:30px; margin-top:16px; font-weight:900; }
     .answer-box {
-      margin-top: 16px;
-      padding: 14px;
-      border-radius: 14px;
-      background: #f8fafc;
-      border: 1px solid #e5e7eb;
-      display: none;
-      align-items: center;
-      gap: 14px;
+      display:none;
+      margin-top:14px;
+      border:1px solid #e5e7eb;
+      background:#f8fafc;
+      border-radius:16px;
+      padding:14px;
+      align-items:center;
+      gap:14px;
     }
-    .answer-box.show { display: flex; }
+    .answer-box.show { display:flex; }
     .answer-box img {
-      width: 88px;
-      height: 88px;
-      object-fit: contain;
-      background: white;
-      border-radius: 12px;
-      border: 1px solid #e5e7eb;
-      padding: 8px;
+      width:94px; height:94px; object-fit:contain;
+      border-radius:14px; background:white; border:1px solid #e5e7eb;
     }
-    .answer-info strong { display: block; font-size: 18px; margin-bottom: 6px; }
-    .controls { margin-top: 18px; display: flex; gap: 12px; flex-wrap: wrap; }
+    .answer-info strong { display:block; font-size:20px; margin-bottom:6px; }
+    .controls { display:flex; gap:12px; flex-wrap:wrap; margin-top:18px; }
     .main-btn {
-      border: none;
-      border-radius: 14px;
-      padding: 12px 18px;
-      font-size: 15px;
-      font-weight: 800;
-      cursor: pointer;
-      background: #2563eb;
-      color: white;
+      border:none;
+      border-radius:14px;
+      padding:12px 18px;
+      font-weight:900;
+      cursor:pointer;
+      background:#2563eb;
+      color:white;
     }
-    .main-btn.secondary { background: #64748b; }
-    .main-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-    .loading { color: #475569; font-weight: 700; margin-top: 10px; }
-    @media (max-width: 700px) {
-      .options { grid-template-columns: 1fr; }
-      .option-btn { min-height: 90px; }
-      .option-image { width: 64px; height: 64px; }
-      .answer-box { flex-direction: column; align-items: flex-start; }
+    .secondary { background:#64748b; }
+    .danger { background:#111827; }
+    .main-btn:disabled { opacity:.55; cursor:not-allowed; }
+    .loading { margin-top:12px; color:#64748b; font-weight:700; }
+
+    .result-screen {
+      display:none;
+      text-align:center;
+      padding:24px 4px 8px;
+    }
+    .result-screen.show { display:block; }
+    .game-screen.hide { display:none; }
+    .trophy {
+      font-size:72px;
+      line-height:1;
+      margin-bottom:14px;
+    }
+    .result-title { font-size:clamp(30px,5vw,52px); margin:0 0 10px; }
+    .result-sub { color:#64748b; font-size:18px; line-height:1.7; max-width:720px; margin:0 auto 18px; }
+    .result-score {
+      display:inline-block;
+      font-size:22px;
+      font-weight:900;
+      background:#f1f5f9;
+      border-radius:16px;
+      padding:12px 18px;
+      margin-bottom:18px;
+    }
+    .champion-card {
+      max-width:700px;
+      margin:18px auto;
+      padding:20px;
+      border-radius:22px;
+      background:linear-gradient(135deg,#fff7ed,#fef3c7,#fdf2f8);
+      border:1px solid #fde68a;
+    }
+    .grade-list {
+      max-width:700px;
+      margin:18px auto 0;
+      text-align:left;
+      display:grid;
+      gap:10px;
+    }
+    .grade-item {
+      border:1px solid #e5e7eb;
+      background:#f8fafc;
+      border-radius:14px;
+      padding:12px 14px;
+      font-weight:700;
+    }
+    @media(max-width:760px){
+      .topbar{grid-template-columns:1fr 1fr;}
+      .options{grid-template-columns:1fr;}
+      .stat-row{grid-template-columns:52px 1fr 46px;}
+      .card{padding:18px;}
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="card">
-      <h1>宝可梦种族值猜谜</h1>
-      <div class="sub">看种族值图，猜是哪一只宝可梦。</div>
-
-      <div class="topbar">
-        <div class="pill" id="roundDisplay">第 0 题</div>
-        <div class="pill" id="scoreDisplay">分数：0</div>
-        <div class="pill" id="poolDisplay">题库：加载中...</div>
+<div class="container">
+  <div class="card">
+    <div class="hero">
+      <div>
+        <h1>宝可梦种族值挑战</h1>
+        <div class="sub">看六项种族值，从四个宝可梦中选出正确答案。挑战模式共 20 关，难度从 0 逐步提升至 20。</div>
       </div>
+      <div class="mode-badge">⚔️ CHALLENGE MODE</div>
+    </div>
+
+    <div class="game-screen" id="gameScreen">
+      <div class="topbar">
+        <div class="pill" id="stageDisplay">关卡：1 / 20</div>
+        <div class="pill" id="difficultyDisplay">难度：0.0 / 20</div>
+        <div class="pill" id="scoreDisplay">答对：0</div>
+        <div class="pill" id="poolDisplay">全国图鉴：读取中...</div>
+      </div>
+
+      <div class="progress-wrap"><div class="progress-bar" id="progressBar"></div></div>
 
       <div class="settings">
         <div class="setting-block">
-          <label for="difficultySelect"><strong>难度</strong></label>
-          <select id="difficultySelect">
-            <option value="easy">简单</option>
-            <option value="normal" selected>普通</option>
-            <option value="hard">困难</option>
-            <option value="expert">地狱</option>
+          <strong>模式</strong>
+          <select id="modeSelect">
+            <option value="challenge" selected>20关挑战</option>
+            <option value="free">自由练习</option>
           </select>
         </div>
-
-        <div class="setting-block">
-          <label for="dexSelect"><strong>题库范围</strong></label>
-          <select id="dexSelect">
-            <option value="151" selected>前151只</option>
-            <option value="251">前251只</option>
-            <option value="386">前386只</option>
+        <div class="setting-block" id="freeDifficultyBox" style="display:none">
+          <strong>练习难度</strong>
+          <select id="freeDifficulty">
+            <option value="0">0 - 入门</option>
+            <option value="5">5 - 简单</option>
+            <option value="10" selected>10 - 普通</option>
+            <option value="15">15 - 困难</option>
+            <option value="20">20 - 极限</option>
           </select>
         </div>
       </div>
 
       <div class="stats-box">
-        <div class="stats-title">种族值图</div>
+        <div class="stats-title">
+          <span>种族值</span>
+          <span class="difficulty-label" id="difficultyLabel">入门</span>
+        </div>
         <div id="statsArea">正在准备题目...</div>
       </div>
 
@@ -219,331 +307,446 @@
       <div class="feedback" id="feedback"></div>
 
       <div class="answer-box" id="answerBox">
-        <img id="answerImage" src="" alt="宝可梦图片" />
+        <img id="answerImage" src="" alt="正确答案">
         <div class="answer-info">
           <strong id="answerName"></strong>
           <div id="answerExtra"></div>
         </div>
       </div>
 
-      <div class="loading" id="loading">正在加载宝可梦数据（首次需要几秒）...</div>
+      <div class="loading" id="loading">正在读取全国图鉴...</div>
 
       <div class="controls">
-        <button class="main-btn" id="nextBtn" disabled>下一题</button>
-        <button class="main-btn secondary" id="resetBtn">重新开始</button>
+        <button class="main-btn" id="nextBtn" disabled>下一关</button>
+        <button class="main-btn secondary" id="restartBtn">重新开始</button>
+      </div>
+    </div>
+
+    <div class="result-screen" id="resultScreen">
+      <div class="trophy" id="resultIcon">🏆</div>
+      <h2 class="result-title" id="resultTitle">宝可梦冠军！</h2>
+      <div class="result-score" id="resultScore">20 / 20</div>
+      <p class="result-sub" id="resultMessage"></p>
+
+      <div class="champion-card" id="championCard">
+        <strong style="font-size:22px">冠军认证</strong>
+        <p style="line-height:1.8;margin-bottom:0">你已经能够从细微的种族值分布中辨认宝可梦。这样的判断力，足以站上宝可梦联盟的最高舞台。</p>
+      </div>
+
+      <div class="grade-list">
+        <div class="grade-item">🏆 冠军：20 / 20</div>
+        <div class="grade-item">👑 四天王级：17–19</div>
+        <div class="grade-item">🥇 道馆馆主级：13–16</div>
+        <div class="grade-item">⚡ 精英训练家级：9–12</div>
+        <div class="grade-item">🌱 新人训练家级：0–8</div>
+      </div>
+
+      <div class="controls" style="justify-content:center">
+        <button class="main-btn danger" id="playAgainBtn">再次挑战</button>
       </div>
     </div>
   </div>
+</div>
 
-  <script>
-    const MAX_STAT = 255;
-    const statsArea = document.getElementById("statsArea");
-    const optionsArea = document.getElementById("optionsArea");
-    const feedback = document.getElementById("feedback");
-    const loading = document.getElementById("loading");
-    const nextBtn = document.getElementById("nextBtn");
-    const resetBtn = document.getElementById("resetBtn");
-    const roundDisplay = document.getElementById("roundDisplay");
-    const scoreDisplay = document.getElementById("scoreDisplay");
-    const poolDisplay = document.getElementById("poolDisplay");
-    const difficultySelect = document.getElementById("difficultySelect");
-    const dexSelect = document.getElementById("dexSelect");
-    const answerBox = document.getElementById("answerBox");
-    const answerImage = document.getElementById("answerImage");
-    const answerName = document.getElementById("answerName");
-    const answerExtra = document.getElementById("answerExtra");
+<script>
+const TOTAL_STAGES = 20;
+const MAX_STAT = 255;
 
-    let pokemonPool = [];
-    let currentPokemon = null;
-    let currentOptions = [];
-    let round = 0;
-    let score = 0;
-    let answered = false;
-    let currentLimit = Number(dexSelect.value);
+const stageDisplay = document.getElementById("stageDisplay");
+const difficultyDisplay = document.getElementById("difficultyDisplay");
+const scoreDisplay = document.getElementById("scoreDisplay");
+const poolDisplay = document.getElementById("poolDisplay");
+const progressBar = document.getElementById("progressBar");
+const difficultyLabel = document.getElementById("difficultyLabel");
+const statsArea = document.getElementById("statsArea");
+const optionsArea = document.getElementById("optionsArea");
+const feedback = document.getElementById("feedback");
+const loading = document.getElementById("loading");
+const nextBtn = document.getElementById("nextBtn");
+const restartBtn = document.getElementById("restartBtn");
+const modeSelect = document.getElementById("modeSelect");
+const freeDifficultyBox = document.getElementById("freeDifficultyBox");
+const freeDifficulty = document.getElementById("freeDifficulty");
+const answerBox = document.getElementById("answerBox");
+const answerImage = document.getElementById("answerImage");
+const answerName = document.getElementById("answerName");
+const answerExtra = document.getElementById("answerExtra");
+const gameScreen = document.getElementById("gameScreen");
+const resultScreen = document.getElementById("resultScreen");
+const resultIcon = document.getElementById("resultIcon");
+const resultTitle = document.getElementById("resultTitle");
+const resultScore = document.getElementById("resultScore");
+const resultMessage = document.getElementById("resultMessage");
+const championCard = document.getElementById("championCard");
+const playAgainBtn = document.getElementById("playAgainBtn");
 
-    function formatName(name) {
-      return name.split("-").map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(" ");
+let speciesPool = [];
+let pokemonCache = new Map();
+let currentPokemon = null;
+let currentOptions = [];
+let stage = 1;
+let score = 0;
+let answered = false;
+let freeRound = 1;
+let usedSpecies = new Set();
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function difficultyForStage(s) {
+  if (TOTAL_STAGES <= 1) return 20;
+  return ((s - 1) / (TOTAL_STAGES - 1)) * 20;
+}
+
+function difficultyName(d) {
+  if (d < 3) return "入门";
+  if (d < 7) return "简单";
+  if (d < 11) return "普通";
+  if (d < 15) return "困难";
+  if (d < 18) return "专家";
+  return "极限";
+}
+
+function getOfficialArtwork(data) {
+  return data.sprites?.other?.["official-artwork"]?.front_default
+      || data.sprites?.other?.home?.front_default
+      || data.sprites?.front_default
+      || "";
+}
+
+async function loadSpeciesPool() {
+  const res = await fetch("https://pokeapi.co/api/v2/pokemon-species?limit=2000");
+  if (!res.ok) throw new Error("无法读取全国图鉴");
+  const data = await res.json();
+
+  speciesPool = data.results.map((s, index) => ({
+    id: index + 1,
+    name: s.name
+  }));
+
+  poolDisplay.textContent = `全国图鉴：${speciesPool.length} 种`;
+}
+
+async function fetchPokemon(species) {
+  if (pokemonCache.has(species.name)) return pokemonCache.get(species.name);
+
+  const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${species.name}`);
+  if (!res.ok) throw new Error(`无法读取 ${species.name}`);
+  const data = await res.json();
+
+  const statMap = {};
+  data.stats.forEach(x => statMap[x.stat.name] = x.base_stat);
+
+  const stats = [
+    { label:"HP", value:statMap.hp || 0 },
+    { label:"Atk", value:statMap.attack || 0 },
+    { label:"Def", value:statMap.defense || 0 },
+    { label:"SpA", value:statMap["special-attack"] || 0 },
+    { label:"SpD", value:statMap["special-defense"] || 0 },
+    { label:"Spe", value:statMap.speed || 0 }
+  ];
+
+  const p = {
+    id: data.id,
+    speciesName: species.name,
+    name: species.name.split("-").map(w => w.charAt(0).toUpperCase()+w.slice(1)).join(" "),
+    stats,
+    total: stats.reduce((a,b) => a+b.value,0),
+    types: data.types.sort((a,b)=>a.slot-b.slot).map(t=>t.type.name),
+    sprite: getOfficialArtwork(data)
+  };
+
+  pokemonCache.set(species.name, p);
+  return p;
+}
+
+function statDistance(a,b) {
+  let sum = 0;
+  for (let i=0;i<6;i++) {
+    const diff = a.stats[i].value - b.stats[i].value;
+    sum += diff * diff;
+  }
+  return Math.sqrt(sum);
+}
+
+function typeOverlap(a,b) {
+  return a.types.filter(t => b.types.includes(t)).length;
+}
+
+function visualSimilarityPenalty(a,b) {
+  const totalDiff = Math.abs(a.total-b.total);
+  const dist = statDistance(a,b);
+  const overlap = typeOverlap(a,b);
+  return totalDiff * 0.9 + dist * 0.75 - overlap * 18;
+}
+
+async function pickTarget() {
+  let available = speciesPool.filter(s => !usedSpecies.has(s.name));
+  if (!available.length) {
+    usedSpecies.clear();
+    available = speciesPool;
+  }
+  const species = available[Math.floor(Math.random()*available.length)];
+  usedSpecies.add(species.name);
+  return await fetchPokemon(species);
+}
+
+async function buildOptions(target, difficulty) {
+  // Higher difficulty: larger candidate sample, then choose the three most similar.
+  // Lower difficulty: choose noticeably different distractors.
+  const sampleSize = Math.round(18 + difficulty * 3.2);
+  const sampleSpecies = shuffle(speciesPool.filter(s => s.name !== target.speciesName)).slice(0, sampleSize);
+
+  const candidates = [];
+  for (let i=0;i<sampleSpecies.length;i+=10) {
+    const batch = sampleSpecies.slice(i,i+10);
+    const loaded = await Promise.allSettled(batch.map(fetchPokemon));
+    loaded.forEach(r => { if (r.status === "fulfilled") candidates.push(r.value); });
+    if (candidates.length >= Math.max(12, sampleSize * .7)) break;
+  }
+
+  if (candidates.length < 3) throw new Error("候选宝可梦不足");
+
+  const ranked = candidates
+    .map(p => ({p, similarity: visualSimilarityPenalty(target,p)}))
+    .sort((a,b)=>a.similarity-b.similarity);
+
+  let wrong;
+  if (difficulty < 4) {
+    wrong = ranked.slice().reverse().slice(0,3).map(x=>x.p);
+  } else if (difficulty < 9) {
+    const start = Math.floor(ranked.length * .45);
+    wrong = ranked.slice(start, start+8).slice(0,3).map(x=>x.p);
+  } else if (difficulty < 14) {
+    const start = Math.floor(ranked.length * .2);
+    wrong = ranked.slice(start, start+6).slice(0,3).map(x=>x.p);
+  } else if (difficulty < 18) {
+    wrong = ranked.slice(0,6).slice(0,3).map(x=>x.p);
+  } else {
+    // Extreme: bias toward same type + extremely similar stat structure.
+    const extremeRanked = candidates
+      .map(p => ({
+        p,
+        score: visualSimilarityPenalty(target,p) - typeOverlap(target,p)*28
+      }))
+      .sort((a,b)=>a.score-b.score);
+    wrong = extremeRanked.slice(0,3).map(x=>x.p);
+  }
+
+  return shuffle([target, ...wrong]);
+}
+
+function renderStats(pokemon) {
+  statsArea.innerHTML = pokemon.stats.map(s => {
+    const width = Math.max(3,(s.value/MAX_STAT)*100);
+    return `
+      <div class="stat-row">
+        <div class="stat-label">${s.label}</div>
+        <div class="bar-wrap"><div class="bar" style="width:${width}%"></div></div>
+        <div class="stat-value">${s.value}</div>
+      </div>`;
+  }).join("") + `<div class="total-box">总种族值 BST：${pokemon.total}</div>`;
+}
+
+function renderOptions() {
+  optionsArea.innerHTML = "";
+  currentOptions.forEach(option => {
+    const btn = document.createElement("button");
+    btn.className = "option-btn";
+    btn.innerHTML = `
+      <img class="option-image" src="${option.sprite}" alt="${option.name}">
+      <div>
+        <div class="option-name">${option.name}</div>
+        <div class="option-meta">#${option.id} · ${option.types.join(" / ")}</div>
+      </div>`;
+    btn.addEventListener("click",()=>handleAnswer(option,btn));
+    optionsArea.appendChild(btn);
+  });
+}
+
+function hideAnswer() {
+  answerBox.classList.remove("show");
+  answerImage.src = "";
+  answerName.textContent = "";
+  answerExtra.textContent = "";
+}
+
+function showAnswer(p) {
+  answerImage.src = p.sprite;
+  answerName.textContent = `${p.name} (#${p.id})`;
+  answerExtra.textContent = `属性：${p.types.join(" / ")} ｜ BST：${p.total}`;
+  answerBox.classList.add("show");
+}
+
+async function startRound() {
+  answered = false;
+  feedback.textContent = "";
+  nextBtn.disabled = true;
+  hideAnswer();
+  optionsArea.innerHTML = "";
+  statsArea.textContent = "正在生成题目...";
+  loading.textContent = "正在从全国图鉴中挑选宝可梦...";
+
+  const challenge = modeSelect.value === "challenge";
+  const difficulty = challenge ? difficultyForStage(stage) : Number(freeDifficulty.value);
+
+  if (challenge) {
+    stageDisplay.textContent = `关卡：${stage} / ${TOTAL_STAGES}`;
+    progressBar.style.width = `${((stage-1)/TOTAL_STAGES)*100}%`;
+  } else {
+    stageDisplay.textContent = `练习：第 ${freeRound} 题`;
+    progressBar.style.width = "100%";
+  }
+
+  difficultyDisplay.textContent = `难度：${difficulty.toFixed(1)} / 20`;
+  difficultyLabel.textContent = difficultyName(difficulty);
+  scoreDisplay.textContent = `答对：${score}`;
+
+  try {
+    currentPokemon = await pickTarget();
+    renderStats(currentPokemon);
+    currentOptions = await buildOptions(currentPokemon,difficulty);
+    renderOptions();
+    loading.textContent = "";
+  } catch (e) {
+    console.error(e);
+    loading.textContent = "题目生成失败，请点击“重新开始”重试。";
+  }
+}
+
+function handleAnswer(selected,clickedBtn) {
+  if (answered) return;
+  answered = true;
+
+  const buttons = [...document.querySelectorAll(".option-btn")];
+  buttons.forEach((btn,i)=>{
+    btn.disabled = true;
+    if (currentOptions[i].speciesName === currentPokemon.speciesName) {
+      btn.classList.add("correct");
     }
+  });
 
-    function capitalize(str) {
-      return str.charAt(0).toUpperCase() + str.slice(1);
+  if (selected.speciesName === currentPokemon.speciesName) {
+    score++;
+    clickedBtn.classList.add("correct");
+    feedback.textContent = "✅ 答对了！";
+  } else {
+    clickedBtn.classList.add("wrong");
+    feedback.textContent = `❌ 答错了，正确答案是 ${currentPokemon.name}。`;
+  }
+
+  showAnswer(currentPokemon);
+  scoreDisplay.textContent = `答对：${score}`;
+  nextBtn.disabled = false;
+
+  if (modeSelect.value === "challenge") {
+    progressBar.style.width = `${(stage/TOTAL_STAGES)*100}%`;
+    nextBtn.textContent = stage === TOTAL_STAGES ? "查看挑战结果" : "下一关";
+  } else {
+    nextBtn.textContent = "下一题";
+  }
+}
+
+function getResult(score) {
+  if (score === 20) {
+    return {
+      icon:"🏆",
+      title:"宝可梦冠军！",
+      message:"20 关全胜。你不仅记住了宝可梦，更能从种族值分布的细节中迅速辨认它们。联盟冠军之位属于你。",
+      champion:true
+    };
+  }
+  if (score >= 17) {
+    return {
+      icon:"👑",
+      title:"四天王级训练家",
+      message:"你的判断力已经非常接近冠军水平。即使在高难度关卡里，也很少有宝可梦能骗过你。",
+      champion:false
+    };
+  }
+  if (score >= 13) {
+    return {
+      icon:"🥇",
+      title:"道馆馆主级训练家",
+      message:"你已经具备相当扎实的种族值知识。再熟悉一些相似定位和相近 BST 的宝可梦，就有机会挑战四天王。",
+      champion:false
+    };
+  }
+  if (score >= 9) {
+    return {
+      icon:"⚡",
+      title:"精英训练家",
+      message:"你已经能认出不少典型的种族值分布，但高难度的相似宝可梦仍然会制造麻烦。继续挑战会很快进步。",
+      champion:false
+    };
+  }
+  return {
+    icon:"🌱",
+    title:"新人训练家",
+    message:"你的冒险才刚刚开始。先熟悉常见宝可梦的种族值特点，再回来挑战，成绩一定会明显提升。",
+    champion:false
+  };
+}
+
+function finishChallenge() {
+  const r = getResult(score);
+  gameScreen.classList.add("hide");
+  resultScreen.classList.add("show");
+  resultIcon.textContent = r.icon;
+  resultTitle.textContent = r.title;
+  resultScore.textContent = `${score} / ${TOTAL_STAGES}`;
+  resultMessage.textContent = r.message;
+  championCard.style.display = r.champion ? "block" : "none";
+}
+
+nextBtn.addEventListener("click",()=>{
+  if (modeSelect.value === "challenge") {
+    if (stage >= TOTAL_STAGES) {
+      finishChallenge();
+      return;
     }
+    stage++;
+  } else {
+    freeRound++;
+  }
+  startRound();
+});
 
-    function shuffle(array) {
-      const arr = [...array];
-      for (let i = arr.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [arr[i], arr[j]] = [arr[j], arr[i]];
-      }
-      return arr;
-    }
+function resetGame() {
+  stage = 1;
+  freeRound = 1;
+  score = 0;
+  usedSpecies.clear();
+  nextBtn.textContent = modeSelect.value === "challenge" ? "下一关" : "下一题";
+  gameScreen.classList.remove("hide");
+  resultScreen.classList.remove("show");
+  startRound();
+}
 
-    function getOfficialArtwork(data) {
-      return data.sprites?.other?.["official-artwork"]?.front_default || data.sprites?.front_default || "";
-    }
+restartBtn.addEventListener("click",resetGame);
+playAgainBtn.addEventListener("click",resetGame);
 
-    async function fetchPokemonById(id) {
-      const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`);
-      if (!res.ok) throw new Error(`获取宝可梦 ${id} 失败`);
-      const data = await res.json();
+modeSelect.addEventListener("change",()=>{
+  freeDifficultyBox.style.display = modeSelect.value === "free" ? "flex" : "none";
+  resetGame();
+});
+freeDifficulty.addEventListener("change",resetGame);
 
-      const statMap = {
-        hp: 0, attack: 0, defense: 0,
-        "special-attack": 0, "special-defense": 0, speed: 0
-      };
-
-      data.stats.forEach(s => {
-        statMap[s.stat.name] = s.base_stat;
-      });
-
-      const stats = [
-        { label: "HP", value: statMap.hp },
-        { label: "Atk", value: statMap.attack },
-        { label: "Def", value: statMap.defense },
-        { label: "SpA", value: statMap["special-attack"] },
-        { label: "SpD", value: statMap["special-defense"] },
-        { label: "Spe", value: statMap.speed }
-      ];
-
-      const total = stats.reduce((sum, s) => sum + s.value, 0);
-      const types = data.types.sort((a, b) => a.slot - b.slot).map(t => capitalize(t.type.name));
-
-      return {
-        id: data.id,
-        name: formatName(data.name),
-        stats,
-        total,
-        types,
-        sprite: getOfficialArtwork(data)
-      };
-    }
-
-    async function loadPokemonPool(limit) {
-      const ids = Array.from({ length: limit }, (_, i) => i + 1);
-      const chunkSize = 20;
-      const results = [];
-
-      for (let i = 0; i < ids.length; i += chunkSize) {
-        const chunk = ids.slice(i, i + chunkSize);
-        loading.textContent = `正在加载宝可梦数据... ${Math.min(i + chunkSize, limit)}/${limit}`;
-        const chunkResults = await Promise.all(chunk.map(id => fetchPokemonById(id)));
-        results.push(...chunkResults);
-      }
-
-      return results;
-    }
-
-    function renderStats(pokemon) {
-      const rows = pokemon.stats.map(stat => {
-        const width = Math.max(4, (stat.value / MAX_STAT) * 100);
-        return `
-          <div class="stat-row">
-            <div class="stat-label">${stat.label}</div>
-            <div class="bar-wrap">
-              <div class="bar" style="width:${width}%"></div>
-            </div>
-            <div class="stat-value">${stat.value}</div>
-          </div>
-        `;
-      }).join("");
-
-      statsArea.innerHTML = `${rows}<div class="total-box">总种族值 BST：${pokemon.total}</div>`;
-    }
-
-    function renderOptions() {
-      optionsArea.innerHTML = "";
-
-      currentOptions.forEach(option => {
-        const btn = document.createElement("button");
-        btn.className = "option-btn";
-        btn.addEventListener("click", () => handleAnswer(option, btn));
-
-        btn.innerHTML = `
-          <img class="option-image" src="${option.sprite}" alt="${option.name}">
-          <div class="option-text">
-            <div class="option-name">${option.name}</div>
-            <div class="option-meta">#${option.id} · ${option.types.join(" / ")}</div>
-          </div>
-        `;
-
-        optionsArea.appendChild(btn);
-      });
-    }
-
-    function hasTypeOverlap(a, b) {
-      return a.types.some(type => b.types.includes(type));
-    }
-
-    function getCandidatesByDifficulty(correctPokemon, difficulty) {
-      const others = pokemonPool.filter(p => p.id !== correctPokemon.id);
-
-      if (difficulty === "easy") {
-        let farCandidates = others.filter(p => Math.abs(p.total - correctPokemon.total) >= 120);
-        if (farCandidates.length < 10) {
-          farCandidates = others.filter(p => Math.abs(p.total - correctPokemon.total) >= 80);
-        }
-        return shuffle(farCandidates.length ? farCandidates : others);
-      }
-
-      if (difficulty === "normal") {
-        let candidates = others.filter(p => Math.abs(p.total - correctPokemon.total) <= 70);
-        if (candidates.length < 10) {
-          candidates = others.filter(p => Math.abs(p.total - correctPokemon.total) <= 100);
-        }
-        return shuffle(candidates.length ? candidates : others);
-      }
-
-      if (difficulty === "hard") {
-        let candidates = others.filter(p => Math.abs(p.total - correctPokemon.total) <= 40);
-        if (candidates.length < 10) {
-          candidates = others.filter(p => Math.abs(p.total - correctPokemon.total) <= 60);
-        }
-        return shuffle(candidates.length ? candidates : others);
-      }
-
-      if (difficulty === "expert") {
-        let candidates = others.filter(p =>
-          Math.abs(p.total - correctPokemon.total) <= 35 &&
-          hasTypeOverlap(p, correctPokemon)
-        );
-
-        if (candidates.length < 10) {
-          candidates = others.filter(p => Math.abs(p.total - correctPokemon.total) <= 35);
-        }
-        if (candidates.length < 10) {
-          candidates = others.filter(p => Math.abs(p.total - correctPokemon.total) <= 50);
-        }
-
-        return shuffle(candidates.length ? candidates : others);
-      }
-
-      return shuffle(others);
-    }
-
-    function generateOptions(correctPokemon) {
-      const difficulty = difficultySelect.value;
-      const candidates = getCandidatesByDifficulty(correctPokemon, difficulty);
-      const wrongChoices = [];
-      const usedIds = new Set([correctPokemon.id]);
-
-      for (const p of candidates) {
-        if (!usedIds.has(p.id)) {
-          wrongChoices.push(p);
-          usedIds.add(p.id);
-        }
-        if (wrongChoices.length === 3) break;
-      }
-
-      if (wrongChoices.length < 3) {
-        const fallback = shuffle(pokemonPool.filter(p => !usedIds.has(p.id)));
-        for (const p of fallback) {
-          wrongChoices.push(p);
-          usedIds.add(p.id);
-          if (wrongChoices.length === 3) break;
-        }
-      }
-
-      return shuffle([correctPokemon, ...wrongChoices]);
-    }
-
-    function updateAnswerBox(pokemon) {
-      answerImage.src = pokemon.sprite;
-      answerName.textContent = `${pokemon.name} (#${pokemon.id})`;
-      answerExtra.textContent = `属性：${pokemon.types.join(" / ")} ｜ 总种族值：${pokemon.total}`;
-      answerBox.classList.add("show");
-    }
-
-    function hideAnswerBox() {
-      answerBox.classList.remove("show");
-      answerImage.src = "";
-      answerName.textContent = "";
-      answerExtra.textContent = "";
-    }
-
-    function startRound() {
-      answered = false;
-      feedback.textContent = "";
-      nextBtn.disabled = true;
-      hideAnswerBox();
-
-      round += 1;
-      roundDisplay.textContent = `第 ${round} 题`;
-      scoreDisplay.textContent = `分数：${score}`;
-
-      currentPokemon = pokemonPool[Math.floor(Math.random() * pokemonPool.length)];
-      currentOptions = generateOptions(currentPokemon);
-
-      renderStats(currentPokemon);
-      renderOptions();
-    }
-
-    function handleAnswer(selectedOption, clickedBtn) {
-      if (answered) return;
-      answered = true;
-
-      const buttons = Array.from(document.querySelectorAll(".option-btn"));
-
-      buttons.forEach((btn, index) => {
-        btn.disabled = true;
-        const option = currentOptions[index];
-        if (option.id === currentPokemon.id) {
-          btn.classList.add("correct");
-        }
-      });
-
-      if (selectedOption.id === currentPokemon.id) {
-        score += 1;
-        scoreDisplay.textContent = `分数：${score}`;
-        feedback.textContent = `答对了！这只宝可梦是 ${currentPokemon.name}。`;
-        clickedBtn.classList.add("correct");
-      } else {
-        clickedBtn.classList.add("wrong");
-        feedback.textContent = `答错了！正确答案是 ${currentPokemon.name}。`;
-      }
-
-      updateAnswerBox(currentPokemon);
-      nextBtn.disabled = false;
-    }
-
-    async function reloadGameWithLimit(limit) {
-      try {
-        loading.textContent = "正在加载宝可梦数据（首次需要几秒）...";
-        pokemonPool = await loadPokemonPool(limit);
-        poolDisplay.textContent = `题库：前 ${pokemonPool.length} 只宝可梦`;
-        loading.textContent = "加载完成，开始游戏吧！";
-        round = 0;
-        score = 0;
-        scoreDisplay.textContent = `分数：0`;
-        startRound();
-      } catch (error) {
-        console.error(error);
-        loading.textContent = "数据加载失败，请刷新页面重试。";
-        statsArea.innerHTML = "无法加载宝可梦数据。";
-      }
-    }
-
-    nextBtn.addEventListener("click", startRound);
-
-    resetBtn.addEventListener("click", () => {
-      round = 0;
-      score = 0;
-      scoreDisplay.textContent = `分数：0`;
-      startRound();
-    });
-
-    difficultySelect.addEventListener("change", () => {
-      round = 0;
-      score = 0;
-      scoreDisplay.textContent = `分数：0`;
-      startRound();
-    });
-
-    dexSelect.addEventListener("change", async () => {
-      currentLimit = Number(dexSelect.value);
-      await reloadGameWithLimit(currentLimit);
-    });
-
-    reloadGameWithLimit(currentLimit);
-  </script>
+(async function init(){
+  try{
+    await loadSpeciesPool();
+    await startRound();
+  }catch(e){
+    console.error(e);
+    loading.textContent = "全国图鉴读取失败。请确认网络连接后刷新页面。";
+  }
+})();
+</script>
 </body>
 </html>
