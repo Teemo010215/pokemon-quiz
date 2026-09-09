@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>宝可梦种族值猜谜</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: #f6f7fb;
+      color: #222;
+    }
+    .container {
+      max-width: 980px;
+      margin: 36px auto;
+      padding: 20px;
+    }
+    .card {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+      padding: 24px;
+    }
+    h1 { margin: 0 0 10px; font-size: 30px; }
+    .sub { color: #666; margin-bottom: 20px; }
+    .topbar { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 18px; }
+    .pill {
+      background: #eef2ff;
+      color: #334155;
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: 700;
+    }
+    .settings {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+      align-items: center;
+    }
+    .setting-block {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #f8fafc;
+      border: 1px solid #e5e7eb;
+      border-radius: 14px;
+      padding: 10px 14px;
+    }
+    select {
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      padding: 8px 12px;
+      font-size: 14px;
+      background: white;
+    }
+    .stats-box {
+      border: 1px solid #e8ebf2;
+      border-radius: 18px;
+      padding: 18px;
+      margin-bottom: 22px;
+      background: #fcfcff;
+    }
+    .stats-title { font-size: 18px; font-weight: 800; margin-bottom: 14px; }
+    .stat-row {
+      display: grid;
+      grid-template-columns: 60px 1fr 50px;
+      align-items: center;
+      gap: 10px;
+      margin: 10px 0;
+    }
+    .stat-label { font-size: 14px; font-weight: 700; color: #444; }
+    .bar-wrap {
+      width: 100%;
+      height: 14px;
+      background: #e9edf5;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .bar {
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #60a5fa, #a78bfa);
+    }
+    .stat-value { text-align: right; font-size: 14px; font-weight: 700; color: #333; }
+    .total-box {
+      margin-top: 14px;
+      padding: 12px 14px;
+      background: #f1f5f9;
+      border-radius: 12px;
+      font-weight: 800;
+    }
+    .options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-top: 20px;
+    }
+    .option-btn {
+      border: 1px solid #e5e7eb;
+      border-radius: 16px;
+      padding: 14px;
+      background: #f8fafc;
+      cursor: pointer;
+      text-align: left;
+      transition: 0.15s ease;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      min-height: 100px;
+    }
+    .option-btn:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
+      background: #eef4ff;
+    }
+    .option-btn:disabled { cursor: default; opacity: 0.96; }
+    .option-image {
+      width: 72px;
+      height: 72px;
+      object-fit: contain;
+      background: white;
+      border-radius: 12px;
+      padding: 6px;
+      border: 1px solid #e5e7eb;
+      flex-shrink: 0;
+    }
+    .option-text { display: flex; flex-direction: column; gap: 6px; }
+    .option-name { font-size: 18px; font-weight: 800; color: #1f2937; }
+    .option-meta { font-size: 13px; color: #64748b; font-weight: 600; }
+    .correct { background: #dcfce7 !important; border-color: #86efac !important; }
+    .wrong { background: #fee2e2 !important; border-color: #fca5a5 !important; }
+    .feedback { margin-top: 18px; min-height: 28px; font-size: 16px; font-weight: 800; }
+    .answer-box {
+      margin-top: 16px;
+      padding: 14px;
+      border-radius: 14px;
+      background: #f8fafc;
+      border: 1px solid #e5e7eb;
+      display: none;
+      align-items: center;
+      gap: 14px;
+    }
+    .answer-box.show { display: flex; }
+    .answer-box img {
+      width: 88px;
+      height: 88px;
+      object-fit: contain;
+      background: white;
+      border-radius: 12px;
+      border: 1px solid #e5e7eb;
+      padding: 8px;
+    }
+    .answer-info strong { display: block; font-size: 18px; margin-bottom: 6px; }
+    .controls { margin-top: 18px; display: flex; gap: 12px; flex-wrap: wrap; }
+    .main-btn {
+      border: none;
+      border-radius: 14px;
+      padding: 12px 18px;
+      font-size: 15px;
+      font-weight: 800;
+      cursor: pointer;
+      background: #2563eb;
+      color: white;
+    }
+    .main-btn.secondary { background: #64748b; }
+    .main-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .loading { color: #475569; font-weight: 700; margin-top: 10px; }
+    @media (max-width: 700px) {
+      .options { grid-template-columns: 1fr; }
+      .option-btn { min-height: 90px; }
+      .option-image { width: 64px; height: 64px; }
+      .answer-box { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <h1>宝可梦种族值猜谜</h1>
+      <div class="sub">看种族值图，猜是哪一只宝可梦。</div>
+
+      <div class="topbar">
+        <div class="pill" id="roundDisplay">第 0 题</div>
+        <div class="pill" id="scoreDisplay">分数：0</div>
+        <div class="pill" id="poolDisplay">题库：加载中...</div>
+      </div>
+
+      <div class="settings">
+        <div class="setting-block">
+          <label for="difficultySelect"><strong>难度</strong></label>
+          <select id="difficultySelect">
+            <option value="easy">简单</option>
+            <option value="normal" selected>普通</option>
+            <option value="hard">困难</option>
+            <option value="expert">地狱</option>
+          </select>
+        </div>
+
+        <div class="setting-block">
+          <label for="dexSelect"><strong>题库范围</strong></label>
+          <select id="dexSelect">
+            <option value="151" selected>前151只</option>
+            <option value="251">前251只</option>
+            <option value="386">前386只</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="stats-box">
+        <div class="stats-title">种族值图</div>
+        <div id="statsArea">正在准备题目...</div>
+      </div>
+
+      <div class="options" id="optionsArea"></div>
+      <div class="feedback" id="feedback"></div>
+
+      <div class="answer-box" id="answerBox">
+        <img id="answerImage" src="" alt="宝可梦图片" />
+        <div class="answer-info">
+          <strong id="answerName"></strong>
+          <div id="answerExtra"></div>
+        </div>
+      </div>
+
+      <div class="loading" id="loading">正在加载宝可梦数据（首次需要几秒）...</div>
+
+      <div class="controls">
+        <button class="main-btn" id="nextBtn" disabled>下一题</button>
+        <button class="main-btn secondary" id="resetBtn">重新开始</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const MAX_STAT = 255;
+    const statsArea = document.getElementById("statsArea");
+    const optionsArea = document.getElementById("optionsArea");
+    const feedback = document.getElementById("feedback");
+    const loading = document.getElementById("loading");
+    const nextBtn = document.getElementById("nextBtn");
+    const resetBtn = document.getElementById("resetBtn");
+    const roundDisplay = document.getElementById("roundDisplay");
+    const scoreDisplay = document.getElementById("scoreDisplay");
+    const poolDisplay = document.getElementById("poolDisplay");
+    const difficultySelect = document.getElementById("difficultySelect");
+    const dexSelect = document.getElementById("dexSelect");
+    const answerBox = document.getElementById("answerBox");
+    const answerImage = document.getElementById("answerImage");
+    const answerName = document.getElementById("answerName");
+    const answerExtra = document.getElementById("answerExtra");
+
+    let pokemonPool = [];
+    let currentPokemon = null;
+    let currentOptions = [];
+    let round = 0;
+    let score = 0;
+    let answered = false;
+    let currentLimit = Number(dexSelect.value);
+
+    function formatName(name) {
+      return name.split("-").map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(" ");
+    }
+
+    function capitalize(str) {
+      return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+
+    function shuffle(array) {
+      const arr = [...array];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    function getOfficialArtwork(data) {
+      return data.sprites?.other?.["official-artwork"]?.front_default || data.sprites?.front_default || "";
+    }
+
+    async function fetchPokemonById(id) {
+      const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`);
+      if (!res.ok) throw new Error(`获取宝可梦 ${id} 失败`);
+      const data = await res.json();
+
+      const statMap = {
+        hp: 0, attack: 0, defense: 0,
+        "special-attack": 0, "special-defense": 0, speed: 0
+      };
+
+      data.stats.forEach(s => {
+        statMap[s.stat.name] = s.base_stat;
+      });
+
+      const stats = [
+        { label: "HP", value: statMap.hp },
+        { label: "Atk", value: statMap.attack },
+        { label: "Def", value: statMap.defense },
+        { label: "SpA", value: statMap["special-attack"] },
+        { label: "SpD", value: statMap["special-defense"] },
+        { label: "Spe", value: statMap.speed }
+      ];
+
+      const total = stats.reduce((sum, s) => sum + s.value, 0);
+      const types = data.types.sort((a, b) => a.slot - b.slot).map(t => capitalize(t.type.name));
+
+      return {
+        id: data.id,
+        name: formatName(data.name),
+        stats,
+        total,
+        types,
+        sprite: getOfficialArtwork(data)
+      };
+    }
+
+    async function loadPokemonPool(limit) {
+      const ids = Array.from({ length: limit }, (_, i) => i + 1);
+      const chunkSize = 20;
+      const results = [];
+
+      for (let i = 0; i < ids.length; i += chunkSize) {
+        const chunk = ids.slice(i, i + chunkSize);
+        loading.textContent = `正在加载宝可梦数据... ${Math.min(i + chunkSize, limit)}/${limit}`;
+        const chunkResults = await Promise.all(chunk.map(id => fetchPokemonById(id)));
+        results.push(...chunkResults);
+      }
+
+      return results;
+    }
+
+    function renderStats(pokemon) {
+      const rows = pokemon.stats.map(stat => {
+        const width = Math.max(4, (stat.value / MAX_STAT) * 100);
+        return `
+          <div class="stat-row">
+            <div class="stat-label">${stat.label}</div>
+            <div class="bar-wrap">
+              <div class="bar" style="width:${width}%"></div>
+            </div>
+            <div class="stat-value">${stat.value}</div>
+          </div>
+        `;
+      }).join("");
+
+      statsArea.innerHTML = `${rows}<div class="total-box">总种族值 BST：${pokemon.total}</div>`;
+    }
+
+    function renderOptions() {
+      optionsArea.innerHTML = "";
+
+      currentOptions.forEach(option => {
+        const btn = document.createElement("button");
+        btn.className = "option-btn";
+        btn.addEventListener("click", () => handleAnswer(option, btn));
+
+        btn.innerHTML = `
+          <img class="option-image" src="${option.sprite}" alt="${option.name}">
+          <div class="option-text">
+            <div class="option-name">${option.name}</div>
+            <div class="option-meta">#${option.id} · ${option.types.join(" / ")}</div>
+          </div>
+        `;
+
+        optionsArea.appendChild(btn);
+      });
+    }
+
+    function hasTypeOverlap(a, b) {
+      return a.types.some(type => b.types.includes(type));
+    }
+
+    function getCandidatesByDifficulty(correctPokemon, difficulty) {
+      const others = pokemonPool.filter(p => p.id !== correctPokemon.id);
+
+      if (difficulty === "easy") {
+        let farCandidates = others.filter(p => Math.abs(p.total - correctPokemon.total) >= 120);
+        if (farCandidates.length < 10) {
+          farCandidates = others.filter(p => Math.abs(p.total - correctPokemon.total) >= 80);
+        }
+        return shuffle(farCandidates.length ? farCandidates : others);
+      }
+
+      if (difficulty === "normal") {
+        let candidates = others.filter(p => Math.abs(p.total - correctPokemon.total) <= 70);
+        if (candidates.length < 10) {
+          candidates = others.filter(p => Math.abs(p.total - correctPokemon.total) <= 100);
+        }
+        return shuffle(candidates.length ? candidates : others);
+      }
+
+      if (difficulty === "hard") {
+        let candidates = others.filter(p => Math.abs(p.total - correctPokemon.total) <= 40);
+        if (candidates.length < 10) {
+          candidates = others.filter(p => Math.abs(p.total - correctPokemon.total) <= 60);
+        }
+        return shuffle(candidates.length ? candidates : others);
+      }
+
+      if (difficulty === "expert") {
+        let candidates = others.filter(p =>
+          Math.abs(p.total - correctPokemon.total) <= 35 &&
+          hasTypeOverlap(p, correctPokemon)
+        );
+
+        if (candidates.length < 10) {
+          candidates = others.filter(p => Math.abs(p.total - correctPokemon.total) <= 35);
+        }
+        if (candidates.length < 10) {
+          candidates = others.filter(p => Math.abs(p.total - correctPokemon.total) <= 50);
+        }
+
+        return shuffle(candidates.length ? candidates : others);
+      }
+
+      return shuffle(others);
+    }
+
+    function generateOptions(correctPokemon) {
+      const difficulty = difficultySelect.value;
+      const candidates = getCandidatesByDifficulty(correctPokemon, difficulty);
+      const wrongChoices = [];
+      const usedIds = new Set([correctPokemon.id]);
+
+      for (const p of candidates) {
+        if (!usedIds.has(p.id)) {
+          wrongChoices.push(p);
+          usedIds.add(p.id);
+        }
+        if (wrongChoices.length === 3) break;
+      }
+
+      if (wrongChoices.length < 3) {
+        const fallback = shuffle(pokemonPool.filter(p => !usedIds.has(p.id)));
+        for (const p of fallback) {
+          wrongChoices.push(p);
+          usedIds.add(p.id);
+          if (wrongChoices.length === 3) break;
+        }
+      }
+
+      return shuffle([correctPokemon, ...wrongChoices]);
+    }
+
+    function updateAnswerBox(pokemon) {
+      answerImage.src = pokemon.sprite;
+      answerName.textContent = `${pokemon.name} (#${pokemon.id})`;
+      answerExtra.textContent = `属性：${pokemon.types.join(" / ")} ｜ 总种族值：${pokemon.total}`;
+      answerBox.classList.add("show");
+    }
+
+    function hideAnswerBox() {
+      answerBox.classList.remove("show");
+      answerImage.src = "";
+      answerName.textContent = "";
+      answerExtra.textContent = "";
+    }
+
+    function startRound() {
+      answered = false;
+      feedback.textContent = "";
+      nextBtn.disabled = true;
+      hideAnswerBox();
+
+      round += 1;
+      roundDisplay.textContent = `第 ${round} 题`;
+      scoreDisplay.textContent = `分数：${score}`;
+
+      currentPokemon = pokemonPool[Math.floor(Math.random() * pokemonPool.length)];
+      currentOptions = generateOptions(currentPokemon);
+
+      renderStats(currentPokemon);
+      renderOptions();
+    }
+
+    function handleAnswer(selectedOption, clickedBtn) {
+      if (answered) return;
+      answered = true;
+
+      const buttons = Array.from(document.querySelectorAll(".option-btn"));
+
+      buttons.forEach((btn, index) => {
+        btn.disabled = true;
+        const option = currentOptions[index];
+        if (option.id === currentPokemon.id) {
+          btn.classList.add("correct");
+        }
+      });
+
+      if (selectedOption.id === currentPokemon.id) {
+        score += 1;
+        scoreDisplay.textContent = `分数：${score}`;
+        feedback.textContent = `答对了！这只宝可梦是 ${currentPokemon.name}。`;
+        clickedBtn.classList.add("correct");
+      } else {
+        clickedBtn.classList.add("wrong");
+        feedback.textContent = `答错了！正确答案是 ${currentPokemon.name}。`;
+      }
+
+      updateAnswerBox(currentPokemon);
+      nextBtn.disabled = false;
+    }
+
+    async function reloadGameWithLimit(limit) {
+      try {
+        loading.textContent = "正在加载宝可梦数据（首次需要几秒）...";
+        pokemonPool = await loadPokemonPool(limit);
+        poolDisplay.textContent = `题库：前 ${pokemonPool.length} 只宝可梦`;
+        loading.textContent = "加载完成，开始游戏吧！";
+        round = 0;
+        score = 0;
+        scoreDisplay.textContent = `分数：0`;
+        startRound();
+      } catch (error) {
+        console.error(error);
+        loading.textContent = "数据加载失败，请刷新页面重试。";
+        statsArea.innerHTML = "无法加载宝可梦数据。";
+      }
+    }
+
+    nextBtn.addEventListener("click", startRound);
+
+    resetBtn.addEventListener("click", () => {
+      round = 0;
+      score = 0;
+      scoreDisplay.textContent = `分数：0`;
+      startRound();
+    });
+
+    difficultySelect.addEventListener("change", () => {
+      round = 0;
+      score = 0;
+      scoreDisplay.textContent = `分数：0`;
+      startRound();
+    });
+
+    dexSelect.addEventListener("change", async () => {
+      currentLimit = Number(dexSelect.value);
+      await reloadGameWithLimit(currentLimit);
+    });
+
+    reloadGameWithLimit(currentLimit);
+  </script>
+</body>
+</html>
